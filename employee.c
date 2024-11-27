@@ -4,7 +4,6 @@
 #include "employee.h"
 #include "common.h"
 
-// Function prototypes
 int employeeLogin(char* username, char* password);
 void viewPersonalDetails(char* username);
 void updatePassword(char* username);
@@ -42,12 +41,6 @@ void employeeMenu(char* username) {
     }
 }
 
-// Functions for employee operations will be implemented here
-
-#include <stdio.h>
-#include <string.h>
-#include "common.h"
-
 void viewPersonalDetails(char* username) {
     FILE* file = fopen(EMPLOYEE_FILE, "r");
     if (file == NULL) {
@@ -62,10 +55,9 @@ void viewPersonalDetails(char* username) {
     Employee emp;
     int found = 0;
 
-    // Read each employee record from the file
     while (fscanf(file, "%d %s %s %d %f %d %s",
                   &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
-        // Check if the username matches the employee's name
+  
         if (strcmp(emp.name, username) == 0) {
             printf("\n========================================\n");
             printf("        Personal Details for %s          \n", emp.name);
@@ -78,7 +70,7 @@ void viewPersonalDetails(char* username) {
             printf("%-15s: %s\n", "Department", emp.department);
             printf("========================================\n");
             found = 1;
-            break;  // Exit the loop once the employee is found
+            break;
         }
     }
 
@@ -99,25 +91,23 @@ void displayUpdatePasswordHeader() {
     printf("=============================================================\n");
 }
 
-// Function to update password
+
 void updatePassword(char* username) {
     displayUpdatePasswordHeader();
 
     char oldPassword[MAX_STR_LEN], newPassword[MAX_STR_LEN];
     int found = 0;
 
-    // Prompt for old password
+
     printf("Enter your old password: ");
     scanf("%s", oldPassword);
 
-    // Open the employee file to read existing credentials
     FILE* file = fopen("employee.txt", "r+");
     if (file == NULL) {
         printf("Error: Could not open employee.txt\n");
         return;
     }
 
-    // Create a temporary file to store updated credentials
     FILE* tempFile = fopen("temp_employee.txt", "w");
     if (tempFile == NULL) {
         printf("Error: Could not create temporary file.\n");
@@ -127,71 +117,33 @@ void updatePassword(char* username) {
 
     char fileUsername[MAX_STR_LEN], filePassword[MAX_STR_LEN];
 
-    // Read each line from the file, check credentials, and write to the temp file
     while (fscanf(file, "%s %s", fileUsername, filePassword) != EOF) {
         if (strcmp(fileUsername, username) == 0 && strcmp(filePassword, oldPassword) == 0) {
-            // If username and old password match, update the password
             printf("\nUsername and old password verified successfully!\n");
             printf("Enter your new password: ");
             scanf("%s", newPassword);
-            fprintf(tempFile, "%s %s\n", fileUsername, newPassword);  // Update with new password
+            fprintf(tempFile, "%s %s\n", fileUsername, newPassword);  
             found = 1;
-        } else {
-            // Otherwise, keep the old record
+        } else {      
             fprintf(tempFile, "%s %s\n", fileUsername, filePassword);
         }
     }
 
-    // Check if the username and password were found
     if (!found) {
         printf("\nError: Username or password is incorrect.\n");
     } else {
         printf("\nPassword updated successfully!\n");
     }
 
-    // Close the original and temporary file
     fclose(file);
     fclose(tempFile);
 
-    // Replace the old file with the new one
     remove("employee.txt");
     rename("temp_employee.txt", "employee.txt");
 
     printf("=============================================================\n");
 }
-//    FILE* file = fopen(EMPLOYEE_FILE, "r+");
-//    if (file == NULL) {
-//        printf("Could not open employee file.\n");
-//        return;
-//    }
 
-//    Employee emp;
-//    int found = 0;
-//    long pos;
-
-    // Search for the employee with the matching username
-//    while (fscanf(file, "%d %s %s %d %f %d %s", &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
-//        pos = ftell(file) - sizeof(Employee);
-//        if (strcmp(emp.name, username) == 0) {
-//            found = 1;
-//            printf("Enter salary increment amount: ");
-//            float increment;
-//            scanf("%f", &increment);
-//            emp.salary += increment;  // Apply the increment
-            
-//            // Update the employee's salary in the file
-//            fseek(file, pos + sizeof(Employee) - sizeof(emp.salary), SEEK_SET);
-//            fprintf(file, "%.2f\n", emp.salary);
-//            break;
-//        }
-//    }
-
-//    if (!found) {
-//        printf("Employee with username '%s' not found.\n", username);
-//    }
-//
-//    fclose(file);
-//}
 
 void requestSalaryIncrement(char* username) {
     FILE* empFile = fopen(EMPLOYEE_FILE, "r");
@@ -222,7 +174,6 @@ void requestSalaryIncrement(char* username) {
     printf("        Salary Increment Request         \n");
     printf("========================================\n");
 
-    // Search for the employee with the matching username
     while (fscanf(empFile, "%d %s %s %d %f %d %s", &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
         if (strcmp(emp.name, username) == 0) {
             found = 1;
@@ -230,7 +181,6 @@ void requestSalaryIncrement(char* username) {
             float increment;
             scanf("%f", &increment);
 
-            // Log the increment request in the increment file
             fprintf(incFile, "%d %s %.2f\n", emp.id, emp.name, increment);
             printf("\n========================================\n");
             printf("Request logged successfully!\n");
@@ -252,8 +202,6 @@ void requestSalaryIncrement(char* username) {
     fclose(incFile);
 }
 
-#include <stdio.h>
-#include <string.h>
 
 void viewLeaveBalance(char* username) {
     FILE* file = fopen("leave_balances.txt", "r");
@@ -274,7 +222,6 @@ void viewLeaveBalance(char* username) {
     printf("           Leave Balance Viewer          \n");
     printf("========================================\n");
 
-    // Read each line to find the matching employee's leave balance
     while (fscanf(file, "%s %d", name, &leaveBalance) != EOF) {
         if (strcmp(name, username) == 0) {
             printf("%-15s: %s\n", "Employee", name);
@@ -310,7 +257,6 @@ void accessHandbook() {
     printf("           Employee Handbook             \n");
     printf("========================================\n");
 
-    // Read and display the contents of the handbook file
     printf("Welcome to the Employee Handbook!\n");
     printf("Here are the guidelines and policies:\n");
     printf("----------------------------------------\n");
@@ -343,7 +289,6 @@ void viewAnnouncements() {
     printf("          Latest Announcements           \n");
     printf("========================================\n");
 
-    // Display the announcements
     printf("Here are the latest company announcements:\n");
     printf("----------------------------------------\n");
 
@@ -359,9 +304,8 @@ void viewAnnouncements() {
 }
 
 
-// Employee login function
 int employeeLogin(char* username, char* password) {
-    FILE *file = fopen("employee.txt", "r");  // Open the employee.txt file
+    FILE *file = fopen("employee.txt", "r"); 
     char stored_username[50], stored_password[50];
 
     if (file == NULL) {
@@ -370,22 +314,21 @@ int employeeLogin(char* username, char* password) {
         printf("========================================\n");
         printf("Error: Could not open employee.txt file.\n");
         printf("========================================\n");
-        return 0;  // Login failed
+        return 0;  
     }
 
     printf("\n========================================\n");
     printf("           Employee Login               \n");
     printf("========================================\n");
 
-    // Read the file to check for matching credentials
     while (fscanf(file, "%s %s", stored_username, stored_password) != EOF) {
         if (strcmp(username, stored_username) == 0 && strcmp(password, stored_password) == 0) {
             printf("========================================\n");
             printf("Login Successful!\n");
-            printf("Welcome, %s!\n", username);  // Personalized greeting
+            printf("Welcome, %s!\n", username); 
             printf("========================================\n");
             fclose(file);
-            return 1;  // Login successful
+            return 1; 
         }
     }
 
@@ -393,6 +336,6 @@ int employeeLogin(char* username, char* password) {
     printf("Invalid username or password for employee.\n");
     printf("========================================\n");
     fclose(file);
-    return 0;  // Login failed
+    return 0; 
 }
 
