@@ -5,7 +5,6 @@
 #include "employee.h"
 #include "common.h"
 
-// Function prototypes
 void adminMenu();
 void employeeMenu();
 
@@ -43,7 +42,7 @@ int main() {
                 printf("Enter Employee Password: ");
                 scanf("%s", password);
 
-                // Implement employee authentication in employee.c
+                
                 if (employeeLogin(username, password)) {
                     employeeMenu(username);
                 } else {
