@@ -42,6 +42,9 @@ void manageAnnouncements();
 void loadProjectsFromFile(Project** head);
 void saveProjectsToFile(Project* head);
 void updateProjectStatus();
+void updateProjects();
+void addProject(Project** head);
+void removeProject(Project** head);
 void viewSalaryIncrementRequests();
 // Admin menu
 void adminMenu() {
@@ -219,6 +222,31 @@ void currentProjects() {
         free(temp);
     }
 }
+void updateProjects(){
+        Project* head = NULL;
+
+        //loadProjectsFromFile(&head);
+        loadProjectsFromFile(&head);
+        int choice;
+
+        while(1){
+                printf("\n=== Update Projects ===\n");
+                printf("1. Add project\n");
+                printf("2. Remove project\n");
+                printf("3. Update status of existing project\n");
+                printf("4. Logout\n");
+                scanf("%d",&choice);
+
+                switch(choice){
+                        case 1: addProject(&head); break;
+                        case 2: removeProject(&head); break;
+                        case 3: updateProjectStatus(head); break;
+                        case 4: return;
+                        default: printf("\nInvalid choice. Please try again.\n");
+                }
+        }
+}
+
 void displayProjects(Project* head) {
     if (head == NULL) {
         printf("No current projects to display.\n");
@@ -240,6 +268,138 @@ void displayProjects(Project* head) {
         temp = temp->next;
     }
 }
+void loadProjectsFromFile(Project** head) {
+    FILE* file = fopen("projects.txt", "r"); // Open in read mode
+    if (file == NULL) {
+        printf("Error: Could not open projects.txt\n");
+        return;
+    }
+
+    int id;
+    char name[MAX_STR_LEN], department[MAX_STR_LEN], status[MAX_STR_LEN];
+    char startDate[MAX_STR_LEN], endDate[MAX_STR_LEN];
+
+    while (fscanf(file, "%d,%99[^,],%99[^,],%99[^,],%99[^,],%99[^\n]\n",
+                  &id, name, department, status, startDate, endDate) != EOF) {
+        // Allocate memory for the project
+        Project* newProject = (Project*)malloc(sizeof(Project));
+        if (newProject == NULL) {
+            printf("Error: Memory allocation failed.\n");
+            fclose(file);
+            return;
+        }
+
+        // Assign values
+        newProject->id = id;
+        strcpy(newProject->name, name);
+        strcpy(newProject->department, department);
+        strcpy(newProject->status, status);
+        strcpy(newProject->startDate, startDate);
+        strcpy(newProject->endDate, endDate);
+        newProject->next = *head;
+
+        *head = newProject;
+    }
+
+    fclose(file);
+    printf("Projects loaded successfully.\n");
+}
+void addProject(Project** head) {
+    FILE* file = fopen("projects.txt", "a"); // Open in append mode
+    if (file == NULL) {
+        printf("Error: Could not open projects.txt\n");
+        return;
+    }
+
+    // Allocate memory for the new project
+    Project* newProject = (Project*)malloc(sizeof(Project));
+    if (newProject == NULL) {
+        printf("Error: Memory allocation failed.\n");
+        fclose(file);
+        return;
+    }
+
+    // Get project details from the user
+    printf("Enter project ID: ");
+    scanf("%d", &newProject->id);
+    printf("Enter project name: ");
+    scanf(" %[^\n]", newProject->name);
+    printf("Enter department: ");
+    scanf(" %[^\n]", newProject->department);
+    printf("Enter status: ");
+    scanf(" %[^\n]", newProject->status);
+    printf("Enter start date (yyyy-mm-dd): ");
+    scanf(" %[^\n]", newProject->startDate);
+    printf("Enter end date (yyyy-mm-dd): ");
+    scanf(" %[^\n]", newProject->endDate);
+    newProject->next = NULL;
+
+    // Add the project to the linked list
+    newProject->next = *head;
+    *head = newProject;
+
+    // Write the new project to the file
+    fprintf(file, "%d,%s,%s,%s,%s,%s\n",
+            newProject->id,
+            newProject->name,
+            newProject->department,
+            newProject->status,
+            newProject->startDate,
+            newProject->endDate);
+
+    fclose(file);
+    printf("Project added successfully.\n");
+}
+void removeProject(Project** head) {
+    int id;
+    printf("Enter the project ID to remove: ");
+    scanf("%d", &id);
+
+    Project *current = *head, *prev = NULL;
+
+    // Search for the project
+    while (current != NULL && current->id != id) {
+        prev = current;
+        current = current->next;
+    }
+
+    if (current == NULL) {
+        printf("Project with ID %d not found.\n", id);
+        return;
+    }
+
+    // Remove the project from the linked list
+    if (prev == NULL) {
+        *head = current->next;
+    } else {
+        prev->next = current->next;
+    }
+
+    free(current);
+
+    // Rewrite the file with the updated list
+    FILE* file = fopen("projects.txt", "w"); // Overwrite mode
+    if (file == NULL) {
+        printf("Error: Could not open projects.txt\n");
+        return;
+    }
+
+    Project* temp = *head;
+    while (temp != NULL) {
+        fprintf(file, "%d,%s,%s,%s,%s,%s\n",
+                temp->id,
+                temp->name,
+                temp->department,
+                temp->status,
+                temp->startDate,
+                temp->endDate);
+        temp = temp->next;
+    }
+
+    fclose(file);
+    printf("Project removed successfully.\n");
+}
+
 
 void updateProjectStatus() {
     FILE* file = fopen("projects.txt", "r+");
