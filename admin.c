@@ -3,14 +3,12 @@
 #include <string.h>
 #include "admin.h"
 #include "common.h"
+#include <ctype.h>
 
 
 
-void displayEmployeeDetails();
-
-// Admin login function
 int adminLogin(char* username, char* password) {
-    FILE *file = fopen("admin.txt", "r");  
+    FILE *file = fopen("admin.txt", "r"); 
     char stored_username[50], stored_password[50];
 
     if (file == NULL) {
@@ -18,19 +16,19 @@ int adminLogin(char* username, char* password) {
         return 0;
     }
 
-  
     while (fscanf(file, "%s %s", stored_username, stored_password) != EOF) {
         if (strcmp(username, stored_username) == 0 && strcmp(password, stored_password) == 0) {
             printf("Admin login successful!\n");
             fclose(file);
-            return 1;  // Login successful
+            return 1;  
         }
     }
 
     printf("Invalid username or password for admin.\n");
     fclose(file);
-    return 0;  // Login failed
+    return 0;  
 }
+void displayEmployeeDetails();
 void averageSalaryByDepartment();
 void employeesPerDepartment();
 void currentProjects();
@@ -39,21 +37,20 @@ void addEmployee();
 void removeEmployee();
 void updateEmployee();
 void manageAnnouncements();
+void editLeaveBalance();
 void loadProjectsFromFile(Project** head);
 void saveProjectsToFile(Project* head);
-void updateProjectStatus();
-void updateProjects();
 void addProject(Project** head);
 void removeProject(Project** head);
+void updateProjectStatus();
+void updateProjects();
 void viewSalaryIncrementRequests();
-// Admin menu
+
 void adminMenu() {
     int choice;
 
     while (1) {
-        printf("\n=========================================");
-        printf("\n||             Admin Menu              ||\n");
-        printf("=========================================\n");
+        printf("\n==== Admin Menu ====\n");
         printf("1. Display Employee Details\n");
         printf("2. Average Salary by Department\n");
         printf("3. Number of Employees per Department\n");
@@ -61,11 +58,12 @@ void adminMenu() {
         printf("5. Manage Projects\n");
         printf("6. Highest Paid Employee by Department\n");
         printf("7. Announcements\n");
-        printf("8. Add Employee\n");
-        printf("9. Remove Employee\n");
-        printf("10. Update Employee\n");
-        printf("11. View salary Increment Requests\n");
-        printf("12. Logout\n\n");
+        printf("8. Leave Management\n");
+        printf("9. Add Employee\n");
+        printf("10. Remove Employee\n");
+        printf("11. Update Employee\n");
+        printf("12. View salary Increment Requests\n");
+        printf("13. Logout\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -74,21 +72,44 @@ void adminMenu() {
             case 2: averageSalaryByDepartment(); break;
             case 3: employeesPerDepartment(); break;
             case 4: currentProjects(); break;
-            case 5: updateProjectStatus(); break;
+            case 5: updateProjects(); break;
             case 6: highestPaidEmployee(); break;
             case 7: manageAnnouncements(); break;
-            case 8: addEmployee(); break;
-            case 9: removeEmployee(); break;
-            case 10: updateEmployee(); break;
-            case 11: viewSalaryIncrementRequests(); break;
-            case 12: return; // Logout
+            case 8: editLeaveBalance(); break;
+            case 9: addEmployee(); break;
+            case 10: removeEmployee(); break;
+            case 11: updateEmployee(); break;
+            case 12: viewSalaryIncrementRequests(); break;
+            case 13: return; // Logout
             default: printf("\nInvalid choice. Please try again.\n");
         }
     }
 }
 
 #define EMPLOYEE_FILE "employees.txt"
+void updateProjects(){
+	Project* head = NULL;
 
+	loadProjectsFromFile(&head);
+	int choice;
+
+	while(1){
+		printf("\n=== Update Projects ===\n");
+		printf("1. Add project\n");
+		printf("2. Remove project\n");
+		printf("3. Update status of existing project\n");
+		printf("4. Logout\n");
+		scanf("%d",&choice);
+
+		switch(choice){
+			case 1: addProject(&head); break;
+			case 2: removeProject(&head); break;
+			case 3: updateProjectStatus(&head); break;
+			case 4: return;
+			default: printf("\nInvalid choice. Please try again.\n");
+		}
+	}
+}
 void displayEmployeeDetails() {
     FILE *file = fopen(EMPLOYEE_FILE, "r");
     if (!file) {
@@ -96,25 +117,22 @@ void displayEmployeeDetails() {
         return;
     }
 
-    printf("========================================================================");
-    printf("\n||                         Employee Details                           ||\n");
-    printf("========================================================================\n\n");
-    printf("------------------------------------------------------------------------\n");
-    printf("ID     |Name           |Gender|Age|Salary        |Experience|Department|\n");
-    printf("------------------------------------------------------------------------\n");
+    printf("\n=== Employee Details ===\n");
+    printf("%-8s%-20s%-10s%-6s%-18s%-12s%s\n", 
+           "ID", "Name", "Gender", "Age", "Salary(In LPA)", "Experience", "Department");
+    printf("----------------------------------------------------------------------------------\n");
 
     int id, age, experience;
     float salary;
     char name[50], gender[10], department[50];
 
-    // Read each line and parse the data
+
     while (fscanf(file, "%d %49s %9s %d %f %d %49s",
                   &id, name, gender, &age, &salary, &experience, department) == 7) {
-        // Use consistent column widths for alignment
-        printf("%-7d|%-15s|%-6s|%-3d|%-14.2f|%-10d|%-10s|\n",
+        printf("%-8d%-20s%-10s%-6d%-18.2f%-12d%-20s\n",
                id, name, gender, age, salary, experience, department);
-        printf("------------------------------------------------------------------------\n");
     }
+
     fclose(file);
 }
 void averageSalaryByDepartment() {
@@ -133,10 +151,11 @@ void averageSalaryByDepartment() {
     int age, experience;
     float salary;
 
-
+    
     while (fscanf(file, "%s %s %s %d %f %d %s", id, name, gender, &age, &salary, &experience, departmentTemp) != EOF) {
         int found = -1;
 
+        
         for (int i = 0; i < uniqueDepartments; i++) {
             if (strcmp(department[i], departmentTemp) == 0) {
                 found = i;
@@ -144,10 +163,12 @@ void averageSalaryByDepartment() {
             }
         }
 
+        
         if (found != -1) {
             deptSalary[found] += salary;
             deptCount[found]++;
         } else {
+            
             strcpy(department[uniqueDepartments], departmentTemp);
             deptSalary[uniqueDepartments] = salary;
             deptCount[uniqueDepartments] = 1;
@@ -157,16 +178,66 @@ void averageSalaryByDepartment() {
 
     fclose(file);
 
+    
     printf("\nAverage Salary by Department:\n");
+    printf("Department\tAverage Salary(In LPA)\n");
     printf("---------------------------------\n");
-    printf("Department\t|Average Salary|\n");
-    printf("-------------------------------\n");
     for (int i = 0; i < uniqueDepartments; i++) {
-        printf("%s\t\t|%.2f\n", department[i], deptSalary[i] / deptCount[i]);
+        printf("%s\t\t%.2f\n", department[i], deptSalary[i] / deptCount[i]);
     }
 }
-void currentProjects() {
+void employeesPerDepartment() {
+    FILE* file = fopen("employees.txt", "r");
+    if (file == NULL) {
+        printf("\n========================================\n");
+        printf("Error: Could not open employees.txt.\n");
+        printf("========================================\n");
+        return;
+    }
 
+    
+    char departments[10][50];
+    int departmentCount[10] = {0};
+    int numDepartments = 0;
+
+    Employee emp;
+    while (fscanf(file, "%d %s %s %d %f %d %s",
+                  &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
+        int found = 0;
+        
+        for (int i = 0; i < numDepartments; i++) {
+            if (strcmp(departments[i], emp.department) == 0) {
+                departmentCount[i]++;
+                found = 1;
+                break;
+            }
+        }
+        
+        if (!found) {
+            strcpy(departments[numDepartments], emp.department);
+            departmentCount[numDepartments]++;
+            numDepartments++;
+        }
+    }
+
+    fclose(file);
+
+    
+    printf("\n========================================\n");
+    printf("          Employees per Department       \n");
+    printf("========================================\n");
+
+    printf("%-20s%-10s\n", "Department", "Employees");
+    printf("----------------------------------------\n");
+
+    for (int i = 0; i < numDepartments; i++) {
+        printf("%-20s%-10d\n", departments[i], departmentCount[i]);
+    }
+
+    printf("========================================\n");
+}
+void currentProjects() {
+    
     FILE* file = fopen("projects.txt", "r");
     if (file == NULL) {
         printf("Error: Could not open projects.txt\n");
@@ -177,10 +248,11 @@ void currentProjects() {
     int id;
     char name[MAX_STR_LEN], department[MAX_STR_LEN], status[MAX_STR_LEN], startDate[MAX_STR_LEN], endDate[MAX_STR_LEN];
 
-   
+    
     while (fscanf(file, "%d,%99[^,],%99[^,],%99[^,],%99[^,],%99[^\n]", 
             &id, name, department, status, startDate, endDate) != EOF) {
-       
+        
+        
         Project* newProject = (Project*)malloc(sizeof(Project));
         if (newProject == NULL) {
             printf("Error: Memory allocation failed.\n");
@@ -188,6 +260,7 @@ void currentProjects() {
             return;
         }
 
+        
         newProject->id = id;
         strcpy(newProject->name, name);
         strcpy(newProject->department, department);
@@ -200,18 +273,18 @@ void currentProjects() {
 
     fclose(file);
 
+    
     if (head == NULL) {
         printf("No current projects to display.\n");
     } else {
-       
+        
         printf("=========================================================================================================\n");
-        printf("||                                   Current Projects List                                             ||\n");
+        printf("=                                    Current Projects List                                          =\n");
         printf("=========================================================================================================\n");
         printf("| %-4s | %-22s | %-20s | %-12s | %-12s | %-12s |\n", 
                 "ID", "Project Name", "Department", "Status", "Start Date", "End Date");
         printf("----------------------------------------------------------------------------------------------------------\n");
 
-      
         Project* temp = head;
         while (temp != NULL) {
             printf("| %-4d | %-22s | %-20s | %-12s | %-12s | %-12s |\n", 
@@ -221,6 +294,7 @@ void currentProjects() {
         }
     }
 
+    
     Project* temp;
     while (head != NULL) {
         temp = head;
@@ -228,31 +302,6 @@ void currentProjects() {
         free(temp);
     }
 }
-void updateProjects(){
-        Project* head = NULL;
-
-        //loadProjectsFromFile(&head);
-        loadProjectsFromFile(&head);
-        int choice;
-
-        while(1){
-                printf("\n=== Update Projects ===\n");
-                printf("1. Add project\n");
-                printf("2. Remove project\n");
-                printf("3. Update status of existing project\n");
-                printf("4. Logout\n");
-                scanf("%d",&choice);
-
-                switch(choice){
-                        case 1: addProject(&head); break;
-                        case 2: removeProject(&head); break;
-                        case 3: updateProjectStatus(head); break;
-                        case 4: return;
-                        default: printf("\nInvalid choice. Please try again.\n");
-                }
-        }
-}
-
 void displayProjects(Project* head) {
     if (head == NULL) {
         printf("No current projects to display.\n");
@@ -274,50 +323,15 @@ void displayProjects(Project* head) {
         temp = temp->next;
     }
 }
-void loadProjectsFromFile(Project** head) {
-    FILE* file = fopen("projects.txt", "r"); // Open in read mode
-    if (file == NULL) {
-        printf("Error: Could not open projects.txt\n");
-        return;
-    }
 
-    int id;
-    char name[MAX_STR_LEN], department[MAX_STR_LEN], status[MAX_STR_LEN];
-    char startDate[MAX_STR_LEN], endDate[MAX_STR_LEN];
-
-    while (fscanf(file, "%d,%99[^,],%99[^,],%99[^,],%99[^,],%99[^\n]\n",
-                  &id, name, department, status, startDate, endDate) != EOF) {
-        // Allocate memory for the project
-        Project* newProject = (Project*)malloc(sizeof(Project));
-        if (newProject == NULL) {
-            printf("Error: Memory allocation failed.\n");
-            fclose(file);
-            return;
-        }
-
-        // Assign values
-        newProject->id = id;
-        strcpy(newProject->name, name);
-        strcpy(newProject->department, department);
-        strcpy(newProject->status, status);
-        strcpy(newProject->startDate, startDate);
-        strcpy(newProject->endDate, endDate);
-        newProject->next = *head;
-
-        *head = newProject;
-    }
-
-    fclose(file);
-    printf("Projects loaded successfully.\n");
-}
 void addProject(Project** head) {
-    FILE* file = fopen("projects.txt", "a"); // Open in append mode
+    FILE* file = fopen("projects.txt", "a"); 
     if (file == NULL) {
         printf("Error: Could not open projects.txt\n");
         return;
     }
 
-    // Allocate memory for the new project
+    
     Project* newProject = (Project*)malloc(sizeof(Project));
     if (newProject == NULL) {
         printf("Error: Memory allocation failed.\n");
@@ -325,9 +339,23 @@ void addProject(Project** head) {
         return;
     }
 
-    // Get project details from the user
+    
     printf("Enter project ID: ");
     scanf("%d", &newProject->id);
+
+    
+    Project* temp = *head;
+    while (temp != NULL) {
+        if (temp->id == newProject->id) {
+            printf("Error: A project with ID %d already exists. Cannot add duplicate.\n", newProject->id);
+            free(newProject); 
+            fclose(file);
+            return;
+        }
+        temp = temp->next;
+    }
+
+    
     printf("Enter project name: ");
     scanf(" %[^\n]", newProject->name);
     printf("Enter department: ");
@@ -338,13 +366,12 @@ void addProject(Project** head) {
     scanf(" %[^\n]", newProject->startDate);
     printf("Enter end date (yyyy-mm-dd): ");
     scanf(" %[^\n]", newProject->endDate);
-    newProject->next = NULL;
 
-    // Add the project to the linked list
+   
     newProject->next = *head;
     *head = newProject;
 
-    // Write the new project to the file
+    
     fprintf(file, "%d,%s,%s,%s,%s,%s\n",
             newProject->id,
             newProject->name,
@@ -356,6 +383,7 @@ void addProject(Project** head) {
     fclose(file);
     printf("Project added successfully.\n");
 }
+
 void removeProject(Project** head) {
     int id;
     printf("Enter the project ID to remove: ");
@@ -363,7 +391,7 @@ void removeProject(Project** head) {
 
     Project *current = *head, *prev = NULL;
 
-    // Search for the project
+    
     while (current != NULL && current->id != id) {
         prev = current;
         current = current->next;
@@ -374,7 +402,7 @@ void removeProject(Project** head) {
         return;
     }
 
-    // Remove the project from the linked list
+    
     if (prev == NULL) {
         *head = current->next;
     } else {
@@ -383,8 +411,8 @@ void removeProject(Project** head) {
 
     free(current);
 
-    // Rewrite the file with the updated list
-    FILE* file = fopen("projects.txt", "w"); // Overwrite mode
+    
+    FILE* file = fopen("projects.txt", "w"); 
     if (file == NULL) {
         printf("Error: Could not open projects.txt\n");
         return;
@@ -405,22 +433,101 @@ void removeProject(Project** head) {
     fclose(file);
     printf("Project removed successfully.\n");
 }
+      
+void updateProjectStatus(Project** head) {
+    if (*head == NULL) {
+        printf("No projects available to update.\n");
+        return;
+    }
+
+    
+    displayProjects(*head);
+
+    
+    printf("Enter the project ID to update its status: ");
+    int projectId;
+    scanf("%d", &projectId);
+
+    
+    Project* temp = *head;
+    while (temp != NULL) {
+        if (temp->id == projectId) {
+           
+            printf("Enter new status for the project:\n");
+            printf("  0 - Pending\n");
+            printf("  1 - Active\n");
+            printf("  2 - Completed\n");
+            int statusOption;
+            scanf("%d", &statusOption);
+
+            
+            if (statusOption < 0 || statusOption > 2) {
+                printf("Invalid status option. Please enter 0, 1, or 2.\n");
+                return;
+            }
+
+            
+            switch (statusOption) {
+                case 0:
+                    strcpy(temp->status, "Pending");
+                    break;
+                case 1:
+                    strcpy(temp->status, "Active");
+                    break;
+                case 2:
+                    strcpy(temp->status, "Completed");
+                    break;
+            }
+            printf("Project status updated successfully.\n");
+
+                        saveProjectsToFile(*head);
+            return;
+        }
+        temp = temp->next;
+    }
+
+    
+    printf("Error: No project with ID %d found.\n", projectId);
+}
 
 
-void updateProjectStatus() {
-    FILE* file = fopen("projects.txt", "r+");
+void saveProjectsToFile(Project* head) {
+    FILE* file = fopen("projects.txt", "w");
+    if (file == NULL) {
+        printf("Error: Could not open projects.txt for saving.\n");
+        return;
+    }
+
+    Project* temp = head;
+    while (temp != NULL) {
+        fprintf(file, "%d,%s,%s,%s,%s,%s\n",
+                temp->id,
+                temp->name,
+                temp->department,
+                temp->status,
+                temp->startDate,
+                temp->endDate);
+        temp = temp->next;
+    }
+
+    fclose(file);
+}
+
+
+void loadProjectsFromFile(Project** head) {
+    FILE* file = fopen("projects.txt", "r"); 
     if (file == NULL) {
         printf("Error: Could not open projects.txt\n");
         return;
     }
 
-    Project* head = NULL;
     int id;
-    char name[MAX_STR_LEN], department[MAX_STR_LEN], status[MAX_STR_LEN], startDate[MAX_STR_LEN], endDate[MAX_STR_LEN];
+    char name[MAX_STR_LEN], department[MAX_STR_LEN], status[MAX_STR_LEN];
+    char startDate[MAX_STR_LEN], endDate[MAX_STR_LEN];
 
-    while (fscanf(file, "%d,%99[^,],%99[^,],%99[^,],%99[^,],%99[^\n]", 
-            &id, name, department, status, startDate, endDate) != EOF) {
-
+    while (fscanf(file, "%d,%99[^,],%99[^,],%99[^,],%99[^,],%99[^\n]\n",
+                  &id, name, department, status, startDate, endDate) != EOF) {
+        
         Project* newProject = (Project*)malloc(sizeof(Project));
         if (newProject == NULL) {
             printf("Error: Memory allocation failed.\n");
@@ -428,120 +535,22 @@ void updateProjectStatus() {
             return;
         }
 
+        
         newProject->id = id;
         strcpy(newProject->name, name);
         strcpy(newProject->department, department);
         strcpy(newProject->status, status);
         strcpy(newProject->startDate, startDate);
         strcpy(newProject->endDate, endDate);
-        newProject->next = head;  
-        head = newProject;
+        newProject->next = *head;
+
+        *head = newProject;
     }
 
     fclose(file);
-
-    displayProjects(head);
-
-    printf("\nEnter the project ID to update its status: ");
-    int projectId;
-    scanf("%d", &projectId);
-
-    printf("\nEnter the new status (e.g., Completed, Pending): ");
-    char newStatus[MAX_STR_LEN];
-    scanf("%s", newStatus);
-
-    Project* temp = head;
-    int projectFound = 0;
-
-    while (temp != NULL) {
-        if (temp->id == projectId) {
-            strcpy(temp->status, newStatus);  
-            projectFound = 1;
-            break;
-        }
-        temp = temp->next;
-    }
-
-    if (!projectFound) {
-        printf("\nError: Project with ID %d not found.\n", projectId);
-    } else {
-     
-        file = fopen("projects.txt", "w");
-        if (file == NULL) {
-            printf("Error: Could not open projects.txt for writing.\n");
-            return;
-        }
-
-        temp = head;
-        while (temp != NULL) {
-            fprintf(file, "%d,%s,%s,%s,%s,%s\n", 
-                    temp->id, temp->name, temp->department, temp->status, temp->startDate, temp->endDate);
-            temp = temp->next;
-        }
-
-        fclose(file);
-        printf("\n=====================================================================\n");
-        printf("=                 Project Status Updated Successfully       =\n");
-        printf("========================================================================\n");
-        printf("\nThe status of Project ID %d has been updated to '%s'.\n", projectId, newStatus);
-    }
-
-    Project* tempFree;
-    while (head != NULL) {
-        tempFree = head;
-        head = head->next;
-        free(tempFree);
-    }
+    printf("Projects loaded successfully.\n");
 }
-void employeesPerDepartment() {
-    FILE* file = fopen("employees.txt", "r");
-    if (file == NULL) {
-        printf("\n========================================\n");
-        printf("Error: Could not open employees.txt.\n");
-        printf("========================================\n");
-        return;
-    }
 
-    char departments[10][50];
-    int departmentCount[10] = {0};
-    int numDepartments = 0;
-
-    Employee emp;
-    while (fscanf(file, "%d %s %s %d %f %d %s",
-                  &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
-        int found = 0;
-   
-        for (int i = 0; i < numDepartments; i++) {
-            if (strcmp(departments[i], emp.department) == 0) {
-                departmentCount[i]++;
-                found = 1;
-                break;
-            }
-        }
-     
-        if (!found) {
-            strcpy(departments[numDepartments], emp.department);
-            departmentCount[numDepartments]++;
-            numDepartments++;
-        }
-    }
-
-    fclose(file);
-
-  
-    printf("\n========================================\n");
-    printf("          Employees per Department       \n");
-    printf("========================================\n");
-
-    printf("%-20s%-10s\n", "Department", "Employees");
-    printf("----------------------------------------\n");
-
-    for (int i = 0; i < numDepartments; i++) {
-        printf("%-20s%-10d\n", departments[i], departmentCount[i]);
-    }
-
-    printf("========================================\n");
-}
 
 void highestPaidEmployee() {
     FILE* file = fopen("employees.txt", "r");
@@ -590,7 +599,7 @@ void manageAnnouncements() {
     FILE* file;
     char announcement[256];
 
-    // Menu display
+    
     printf("\n========================================\n");
     printf("          Announcements Management       \n");
     printf("========================================\n");
@@ -599,9 +608,9 @@ void manageAnnouncements() {
     printf("========================================\n");
     printf("Enter your choice: ");
     scanf("%d", &choice);
-    getchar();  
+    getchar();
 
-    // View Announcements
+    
     if (choice == 1) {
         file = fopen("announcements.txt", "r");
         if (file == NULL) {
@@ -616,7 +625,7 @@ void manageAnnouncements() {
         printf("========================================\n");
         int announcementCount = 0;
         while (fgets(announcement, sizeof(announcement), file)) {
-            printf("%d. %s", ++announcementCount, announcement); 
+            printf("%d. %s", ++announcementCount, announcement);
         }
         if (announcementCount == 0) {
             printf("No announcements available.\n");
@@ -624,7 +633,7 @@ void manageAnnouncements() {
         printf("========================================\n");
         fclose(file);
 
-    // Add Announcement
+    
     } else if (choice == 2) {
         file = fopen("announcements.txt", "a");
         if (file == NULL) {
@@ -643,19 +652,116 @@ void manageAnnouncements() {
         printf("Announcement added successfully.\n");
         printf("========================================\n");
 
-   
+    
     } else {
         printf("\n========================================\n");
         printf("Invalid choice. Please try again.\n");
         printf("========================================\n");
     }
 }
+#define MAX_STR_LEN 100
+
+void editLeaveBalance() {
+    FILE* file = fopen("leave_balances.txt", "r");
+    if (file == NULL) {
+        printf("\n========================================\n");
+        printf("        Leave Balance Editor            \n");
+        printf("========================================\n");
+        printf("Error: Could not open leave balances file.\n");
+        printf("========================================\n");
+        return;
+    }
+
+    char name[MAX_STR_LEN];
+    int leaveBalance;
+
+   
+    char tempName[MAX_STR_LEN];
+    int tempLeaveBalance;
+    int found = 0;
+
+    printf("\n========================================\n");
+    printf("        Leave Balance Editor            \n");
+    printf("========================================\n");
+    printf("Enter the username of the employee: ");
+    scanf("%s", name);
+
+    
+    while (fscanf(file, "%s %d", tempName, &tempLeaveBalance) != EOF) {
+        if (strcmp(tempName, name) == 0) {
+            printf("Current Leave Balance for '%s': %d days\n", tempName, tempLeaveBalance);
+            found = 1;
+            break;
+        }
+    }
+
+    if (!found) {
+        printf("Error: Employee with username '%s' not found.\n", name);
+        printf("========================================\n");
+        fclose(file);
+        return;
+    }
+
+    fclose(file);
+
+   
+    printf("Enter the new leave balance for '%s': ", name);
+    scanf("%d", &leaveBalance);
+
+    file = fopen("leave_balances.txt", "r");
+    FILE* tempFile = fopen("temp_leave_balances.txt", "w");
+    if (tempFile == NULL) {
+        printf("Error: Could not create temporary file.\n");
+        fclose(file);
+        return;
+    }
+
+    while (fscanf(file, "%s %d", tempName, &tempLeaveBalance) != EOF) {
+        if (strcmp(tempName, name) == 0) {
+            fprintf(tempFile, "%s %d\n", tempName, leaveBalance);
+        } else {
+            fprintf(tempFile, "%s %d\n", tempName, tempLeaveBalance);
+        }
+    }
+
+    fclose(file);
+    fclose(tempFile);
+
+    
+    remove("leave_balances.txt");
+    rename("temp_leave_balances.txt", "leave_balances.txt");
+
+    printf("Leave balance for '%s' updated successfully.\n", name);
+    printf("========================================\n");
+}
+
+int isIdExists(int id) {
+    FILE* file = fopen("employees.txt", "r");
+    if (file == NULL) {
+        return 0; 
+    }
+
+    Employee employee;
+    while (fscanf(file, "%d %s %s %d %f %d %s", &employee.id, employee.name, employee.gender, &employee.age,
+                  &employee.salary, &employee.experience, employee.department) == 7) { 
+        if (employee.id == id) {
+            fclose(file);
+            return 1; 
+        }
+    }
+
+    fclose(file);
+    return 0; 
+}
 
 
 void addEmployee() {
-    FILE* file = fopen("employees.txt", "a");
-    if (file == NULL) {
-        printf("Error: Could not open employees.txt.\n");
+    FILE* employeeFile = fopen("employees.txt", "a"); 
+    FILE* credentialsFile = fopen("employee.txt", "a"); 
+    FILE* leaveFile = fopen("leave_balances.txt", "a"); 
+
+    if (employeeFile == NULL || credentialsFile == NULL || leaveFile == NULL) {
+        printf("Error: Could not open one of the files.\n");
         return;
     }
 
@@ -663,21 +769,69 @@ void addEmployee() {
     printf("Enter employee details:\n");
     printf("ID: ");
     scanf("%d", &newEmployee.id);
+
+       if (isIdExists(newEmployee.id)) {
+        printf("Error: Employee with ID %d already exists.\n", newEmployee.id);
+        fclose(employeeFile);
+        fclose(credentialsFile);
+        fclose(leaveFile);
+        return;
+    }
+
     printf("Name: ");
     scanf("%s", newEmployee.name);
-    printf("Gender: ");
-    scanf("%s", newEmployee.gender);
+
+    
+    while (1) {
+        printf("Gender (Male/Female): ");
+        scanf("%s", newEmployee.gender);
+
+                for (int i = 0; newEmployee.gender[i]; i++) {
+            newEmployee.gender[i] = tolower(newEmployee.gender[i]);
+        }
+
+        if (strcmp(newEmployee.gender, "male") == 0 || strcmp(newEmployee.gender, "female") == 0) {
+
+            newEmployee.gender[0] = toupper(newEmployee.gender[0]);
+            break;
+        } else {
+            printf("Invalid input. Please enter 'Male' or 'Female'.\n");
+        }
+    }
+
     printf("Age: ");
     scanf("%d", &newEmployee.age);
     printf("Salary: ");
     scanf("%f", &newEmployee.salary);
     printf("Experience (years): ");
     scanf("%d", &newEmployee.experience);
-    printf("Department: ");
+    printf("Department (In Capitals): ");
     scanf("%s", newEmployee.department);
 
-    fprintf(file, "%d %s %s %d %.2f %d %s\n", newEmployee.id, newEmployee.name, newEmployee.gender, newEmployee.age, newEmployee.salary, newEmployee.experience, newEmployee.department);
-    fclose(file);
+ 
+    char password[50];
+    printf("Enter password for employee login: ");
+    scanf("%s", password);
+
+   
+    fprintf(employeeFile, "%d %s %s %d %.2f %d %s\n",
+            newEmployee.id,
+            newEmployee.name,
+            newEmployee.gender,
+            newEmployee.age,
+            newEmployee.salary,
+            newEmployee.experience,
+            newEmployee.department);
+
+   
+    fprintf(credentialsFile, "%s %s\n", newEmployee.name, password);
+
+    // Store leave balance in leave_balances.txt (default balance = 10)
+    fprintf(leaveFile, "%s 10\n", newEmployee.name);
+
+    fclose(employeeFile);
+    fclose(credentialsFile);
+    fclose(leaveFile);
 
     printf("Employee added successfully.\n");
 }
@@ -743,7 +897,7 @@ void updateEmployee() {
             scanf("%f", &emp.salary);
             printf("Experience (years): ");
             scanf("%d", &emp.experience);
-            printf("Department: ");
+            printf("Department(In Capitals): ");
             scanf("%s", emp.department);
         }
         fprintf(temp, "%d %s %s %d %.2f %d %s\n", emp.id, emp.name, emp.gender, emp.age, emp.salary, emp.experience, emp.department);
@@ -795,4 +949,3 @@ void viewSalaryIncrementRequests() {
     printf("========================================\n");
     fclose(incFile);
 }
-
