@@ -14,16 +14,18 @@ int main() {
     char username[50], password[50];
 
     while (1) {
-        printf("\n==== Employee Management System ====\n");
+        printf("\n================================");
+        printf("\n|| Employee Management System ||");
+        printf("\n================================");
         printf("1. Admin Login\n");
         printf("2. Employee Login\n");
-        printf("3. Exit\n");
+        printf("3. Exit\n\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
         switch (choice) {
             case 1:
-                printf("\nEnter Admin Username: ");
+                printf("\n\nEnter Admin Username: ");
                 scanf("%s", username);
                 printf("Enter Admin Password: ");
                 scanf("%s", password);
