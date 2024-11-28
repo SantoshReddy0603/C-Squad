@@ -51,7 +51,9 @@ void adminMenu() {
     int choice;
 
     while (1) {
-        printf("\n==== Admin Menu ====\n");
+        printf("\n=========================================");
+        printf("\n||             Admin Menu              ||\n");
+        printf("=========================================\n");
         printf("1. Display Employee Details\n");
         printf("2. Average Salary by Department\n");
         printf("3. Number of Employees per Department\n");
@@ -63,7 +65,7 @@ void adminMenu() {
         printf("9. Remove Employee\n");
         printf("10. Update Employee\n");
         printf("11. View salary Increment Requests\n");
-        printf("12. Logout\n");
+        printf("12. Logout\n\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -94,7 +96,10 @@ void displayEmployeeDetails() {
         return;
     }
 
-    printf("\n=== Employee Details ===\n");
+    printf("========================================================================");
+    printf("\n||                         Employee Details                           ||\n");
+    printf("========================================================================\n\n");
+    printf("------------------------------------------------------------------------\n");
     printf("ID     |Name           |Gender|Age|Salary        |Experience|Department|\n");
     printf("------------------------------------------------------------------------\n");
 
@@ -108,8 +113,8 @@ void displayEmployeeDetails() {
         // Use consistent column widths for alignment
         printf("%-7d|%-15s|%-6s|%-3d|%-14.2f|%-10d|%-10s|\n",
                id, name, gender, age, salary, experience, department);
+        printf("------------------------------------------------------------------------\n");
     }
-
     fclose(file);
 }
 void averageSalaryByDepartment() {
@@ -200,7 +205,7 @@ void currentProjects() {
     } else {
        
         printf("=========================================================================================================\n");
-        printf("=                                    Current Projects List                                          =\n");
+        printf("||                                   Current Projects List                                             ||\n");
         printf("=========================================================================================================\n");
         printf("| %-4s | %-22s | %-20s | %-12s | %-12s | %-12s |\n", 
                 "ID", "Project Name", "Department", "Status", "Start Date", "End Date");
