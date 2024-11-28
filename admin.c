@@ -95,18 +95,18 @@ void displayEmployeeDetails() {
     }
 
     printf("\n=== Employee Details ===\n");
-    printf("ID      Name            Gender  Age     Salary          Experience      Department\n");
-    printf("---------------------------------------------------------------------------\n");
+    printf("ID     |Name           |Gender|Age|Salary        |Experience|Department|\n");
+    printf("------------------------------------------------------------------------\n");
 
     int id, age, experience;
     float salary;
     char name[50], gender[10], department[50];
 
-
+    // Read each line and parse the data
     while (fscanf(file, "%d %49s %9s %d %f %d %49s",
                   &id, name, gender, &age, &salary, &experience, department) == 7) {
-
-        printf("%-8d%-16s%-8s%-8d%-15.2f%-16d%s\n",
+        // Use consistent column widths for alignment
+        printf("%-7d|%-15s|%-6s|%-3d|%-14.2f|%-10d|%-10s|\n",
                id, name, gender, age, salary, experience, department);
     }
 
@@ -153,10 +153,11 @@ void averageSalaryByDepartment() {
     fclose(file);
 
     printf("\nAverage Salary by Department:\n");
-    printf("Department\tAverage Salary\n");
     printf("---------------------------------\n");
+    printf("Department\t|Average Salary|\n");
+    printf("-------------------------------\n");
     for (int i = 0; i < uniqueDepartments; i++) {
-        printf("%s\t\t%.2f\n", department[i], deptSalary[i] / deptCount[i]);
+        printf("%s\t\t|%.2f\n", department[i], deptSalary[i] / deptCount[i]);
     }
 }
 void currentProjects() {
