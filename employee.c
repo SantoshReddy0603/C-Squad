@@ -12,7 +12,6 @@ void viewLeaveBalance(char* username);
 void viewAnnouncements();
 void accessHandbook();
 
-// Employee menu
 void employeeMenu(char* username) {
     int choice;
 
@@ -35,11 +34,16 @@ void employeeMenu(char* username) {
             case 4: viewLeaveBalance(username); break;
             case 5: viewAnnouncements(); break;
             case 6: accessHandbook(); break;
-            case 7: return; // Logout
+            case 7: return; 
             default: printf("\nInvalid choice. Please try again.\n");
         }
     }
 }
+
+
+#include <stdio.h>
+#include <string.h>
+#include "common.h"
 
 void viewPersonalDetails(char* username) {
     FILE* file = fopen(EMPLOYEE_FILE, "r");
@@ -57,7 +61,6 @@ void viewPersonalDetails(char* username) {
 
     while (fscanf(file, "%d %s %s %d %f %d %s",
                   &emp.id, emp.name, emp.gender, &emp.age, &emp.salary, &emp.experience, emp.department) != EOF) {
-  
         if (strcmp(emp.name, username) == 0) {
             printf("\n========================================\n");
             printf("        Personal Details for %s          \n", emp.name);
@@ -65,12 +68,12 @@ void viewPersonalDetails(char* username) {
             printf("%-15s: %d\n", "ID", emp.id);
             printf("%-15s: %s\n", "Gender", emp.gender);
             printf("%-15s: %d\n", "Age", emp.age);
-            printf("%-15s: %.2f\n", "Salary", emp.salary);
+            printf("%-15s: %.2f\n", "Salary(In Lpa)", emp.salary);
             printf("%-15s: %d years\n", "Experience", emp.experience);
             printf("%-15s: %s\n", "Department", emp.department);
             printf("========================================\n");
             found = 1;
-            break;
+            break;  
         }
     }
 
@@ -91,13 +94,11 @@ void displayUpdatePasswordHeader() {
     printf("=============================================================\n");
 }
 
-
 void updatePassword(char* username) {
     displayUpdatePasswordHeader();
 
     char oldPassword[MAX_STR_LEN], newPassword[MAX_STR_LEN];
     int found = 0;
-
 
     printf("Enter your old password: ");
     scanf("%s", oldPassword);
@@ -122,9 +123,9 @@ void updatePassword(char* username) {
             printf("\nUsername and old password verified successfully!\n");
             printf("Enter your new password: ");
             scanf("%s", newPassword);
-            fprintf(tempFile, "%s %s\n", fileUsername, newPassword);  
+            fprintf(tempFile, "%s %s\n", fileUsername, newPassword); 
             found = 1;
-        } else {      
+        } else {
             fprintf(tempFile, "%s %s\n", fileUsername, filePassword);
         }
     }
@@ -143,7 +144,6 @@ void updatePassword(char* username) {
 
     printf("=============================================================\n");
 }
-
 
 void requestSalaryIncrement(char* username) {
     FILE* empFile = fopen(EMPLOYEE_FILE, "r");
@@ -202,6 +202,8 @@ void requestSalaryIncrement(char* username) {
     fclose(incFile);
 }
 
+#include <stdio.h>
+#include <string.h>
 
 void viewLeaveBalance(char* username) {
     FILE* file = fopen("leave_balances.txt", "r");
@@ -305,7 +307,7 @@ void viewAnnouncements() {
 
 
 int employeeLogin(char* username, char* password) {
-    FILE *file = fopen("employee.txt", "r"); 
+    FILE *file = fopen("employee.txt", "r");  
     char stored_username[50], stored_password[50];
 
     if (file == NULL) {
@@ -325,7 +327,7 @@ int employeeLogin(char* username, char* password) {
         if (strcmp(username, stored_username) == 0 && strcmp(password, stored_password) == 0) {
             printf("========================================\n");
             printf("Login Successful!\n");
-            printf("Welcome, %s!\n", username); 
+            printf("Welcome, %s!\n", username);  
             printf("========================================\n");
             fclose(file);
             return 1; 
@@ -338,4 +340,3 @@ int employeeLogin(char* username, char* password) {
     fclose(file);
     return 0; 
 }
-
